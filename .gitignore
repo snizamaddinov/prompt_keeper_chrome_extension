@@ -1,0 +1,34 @@
+# filepath: /Users/bkmobil/Projects/extensions/prompt_keeper_chrome_extension/.gitignore
+# Dependencies
+/node_modules
+
+# Build artifacts
+/dist
+/build
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+
+# Optional: Environment variables or sensitive config
+# .env*
+# config.js
+
+# Packaging
+*.zip
+*.crx

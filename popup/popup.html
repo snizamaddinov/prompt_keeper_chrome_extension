@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Keeper</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="../assets/styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Prompt Keeper</h1>
+            <div class="controls">
+                <input type="search" id="search-input" placeholder="Search by title or tag...">
+                <button id="add-prompt-btn" title="Add New Prompt">+</button>
+                <button id="settings-btn" title="Settings/API Key">⚙️</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="prompt-list-view">
+                <ul id="prompt-list">
+                    <!-- Prompt items will be loaded here -->
+                    <li class="prompt-item">Loading...</li>
+                </ul>
+            </div>
+
+            <div id="prompt-detail-view" class="hidden">
+                <button id="back-to-list-btn">&larr; Back</button>
+                <h2 id="detail-title">Prompt Details</h2>
+                <form id="prompt-form">
+                    <input type="hidden" id="prompt-id">
+                    <div class="form-group">
+                        <label for="prompt-title">Title:</label>
+                        <input type="text" id="prompt-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prompt-content">Content:</label>
+                        <textarea id="prompt-content" rows="10" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="prompt-tags">Tags (comma-separated):</label>
+                        <input type="text" id="prompt-tags">
+                        <div id="tag-suggestions">
+                            <!-- Predefined tags could be suggested here -->
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="save-prompt-btn">Save Prompt</button>
+                        <button type="button" id="delete-prompt-btn" class="danger">Delete</button>
+                        <button type="button" id="copy-prompt-btn">Copy Content</button>
+                    </div>
+                </form>
+            </div>
+
+             <div id="generate-prompt-view" class="hidden">
+                <button id="back-to-list-from-generate-btn">&larr; Back</button>
+                <h2>Generate Prompt with AI</h2>
+                 <div class="form-group">
+                    <label for="generate-tags">Tags (comma-separated):</label>
+                    <input type="text" id="generate-tags" placeholder="e.g., Python Developer, API Design">
+                </div>
+                 <div class="form-group">
+                    <label for="generate-notes">Optional Notes:</label>
+                    <textarea id="generate-notes" rows="3" placeholder="e.g., Focus on error handling"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="trigger-generate-btn">Generate</button>
+                </div>
+                <div id="generated-prompt-area" class="hidden">
+                    <h3>Generated Prompt:</h3>
+                    <textarea id="generated-prompt-content" rows="8" readonly></textarea>
+                    <div class="form-actions">
+                         <button type="button" id="save-generated-btn">Save Generated Prompt</button>
+                         <button type="button" id="discard-generated-btn">Discard</button>
+                    </div>
+                </div>
+                 <p id="generation-status"></p>
+            </div>
+
+            <div id="settings-view" class="hidden">
+                 <button id="back-to-list-from-settings-btn">&larr; Back</button>
+                <h2>Settings</h2>
+                <div class="form-group">
+                    <label for="api-key-input">OpenAI API Key:</label>
+                    <input type="password" id="api-key-input" placeholder="Enter your OpenAI API Key">
+                    <button id="save-api-key-btn">Save Key</button>
+                    <p class="api-key-status" id="api-key-status">API Key not set.</p>
+                </div>
+                <p class="help-text">Your API key is stored securely in local extension storage and is only used to communicate with the OpenAI API.</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="../common/storage.js"></script>
+    <script src="../common/openai.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

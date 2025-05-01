@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Keeper",
+  "version": "0.1.0",
+  "description": "Easily manage and generate system prompts for LLMs.",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+    }
+  },
+  "icons": {
+  }
+}
