@@ -39,6 +39,19 @@
                         <label for="prompt-content">Content:</label>
                         <textarea id="prompt-content" rows="10" required></textarea>
                     </div>
+                    <!-- AI Suggestion Area (Initially Hidden) -->
+                    <div id="ai-suggestion-area" class="hidden">
+                        <p id="ai-status-message"></p>
+                        <div id="ai-result-container" class="hidden">
+                             <label for="ai-suggested-content">AI Suggestion:</label>
+                             <textarea id="ai-suggested-content" rows="8" readonly></textarea>
+                             <div class="form-actions ai-suggestion-actions">
+                                 <button type="button" id="use-ai-suggestion-btn">Use Suggestion</button>
+                                 <button type="button" id="discard-ai-suggestion-btn" class="secondary">Discard</button>
+                             </div>
+                        </div>
+                    </div>
+                     <!-- End AI Suggestion Area -->
                     <div class="form-group">
                         <label for="prompt-tags">Tags (comma-separated):</label>
                         <input type="text" id="prompt-tags">
@@ -48,6 +61,8 @@
                     </div>
                     <div class="form-actions">
                         <button type="submit" id="save-prompt-btn">Save Prompt</button>
+                        <button type="button" id="generate-ai-btn" class="secondary">Generate with AI</button> <!-- For New Prompts -->
+                        <button type="button" id="optimize-ai-btn" class="secondary">Optimize with AI</button> <!-- For Existing Prompts -->
                         <button type="button" id="delete-prompt-btn" class="danger">Delete</button>
                         <button type="button" id="copy-prompt-btn">Copy Content</button>
                     </div>

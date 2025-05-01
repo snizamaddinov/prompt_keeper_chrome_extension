@@ -70,3 +70,65 @@ async function generatePrompt(apiKey, tags, notes = '') {
         throw new Error(`Failed to generate prompt: ${error.message}`);
     }
 }
+
+
+/**
+ * Optimizes an existing system prompt using the OpenAI API.
+ * @param {string} apiKey - The user's OpenAI API key.
+ * @param {string} existingPrompt - The prompt content to be optimized.
+ * @returns {Promise<string>} - The optimized prompt content.
+ * @throws {Error} - If the API call fails or returns an error.
+ */
+async function optimizePrompt(apiKey, existingPrompt) {
+     if (!apiKey) {
+        throw new Error("API Key is required to optimize prompts.");
+    }
+    if (!existingPrompt || !existingPrompt.trim()) {
+        throw new Error("Existing prompt content is required for optimization.");
+    }
+
+    const systemMessageContent = `You are an expert assistant specialized in refining and optimizing system prompts for large language models (LLMs). Analyze the provided system prompt and improve its clarity, conciseness, effectiveness, and actionability. Focus on making the LLM's role, context, constraints, and desired output clearer.`;
+
+    const userMessageContent = `Please optimize the following system prompt:\n\n---\n${existingPrompt}\n---\n\nOutput only the optimized system prompt itself, without any introductory text, explanation, or markdown formatting.`;
+
+     try {
+        const response = await fetch(OPENAI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: MODEL, // Or maybe a different model optimized for editing?
+                messages: [
+                    { role: "system", content: systemMessageContent },
+                    { role: "user", content: userMessageContent }
+                ],
+                temperature: 0.5, // Lower temperature for more focused refinement
+                // max_tokens: 300, // Adjust as needed
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("OpenAI API Error (Optimize):", errorData);
+            throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+
+        if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+            return data.choices[0].message.content.trim();
+        } else {
+            console.error("Invalid response structure from OpenAI (Optimize):", data);
+            throw new Error("Failed to parse optimized prompt from API response.");
+        }
+
+    } catch (error) {
+        console.error("Error calling OpenAI API (Optimize):", error);
+         if (error instanceof Error && error.message.includes('API key')) {
+             throw new Error("Invalid OpenAI API Key provided.");
+        }
+        throw new Error(`Failed to optimize prompt: ${error.message}`);
+    }
+}

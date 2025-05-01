@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const deletePromptBtn = document.getElementById('delete-prompt-btn');
     const copyPromptBtn = document.getElementById('copy-prompt-btn');
     const detailTitle = document.getElementById('detail-title');
+    // New elements for AI suggestions in detail view
+    const generateAiBtn = document.getElementById('generate-ai-btn');
+    const optimizeAiBtn = document.getElementById('optimize-ai-btn');
+    const aiSuggestionArea = document.getElementById('ai-suggestion-area');
+    const aiStatusMessage = document.getElementById('ai-status-message');
+    const aiResultContainer = document.getElementById('ai-result-container');
+    const aiSuggestedContent = document.getElementById('ai-suggested-content');
+    const useAiSuggestionBtn = document.getElementById('use-ai-suggestion-btn');
+    const discardAiSuggestionBtn = document.getElementById('discard-ai-suggestion-btn');
 
     // Settings View Elements
     const apiKeyInput = document.getElementById('api-key-input');
@@ -214,6 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
             promptContentInput.value = prompt.content;
             promptTagsInput.value = prompt.tags ? prompt.tags.join(', ') : '';
             deletePromptBtn.classList.remove('hidden'); // Show delete button for existing prompts
+            generateAiBtn.style.display = 'none'; // Hide Generate button
+            optimizeAiBtn.style.display = 'inline-block'; // Show Optimize button
+            hideAiSuggestionArea(); // Ensure AI area is hidden on view switch
             showView('detail');
         } else {
             console.error("Prompt not found for ID:", promptId);
@@ -225,6 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
         promptForm.reset(); // Clear form fields
         promptIdInput.value = ''; // Ensure no ID is set
         deletePromptBtn.classList.add('hidden'); // Hide delete button for new prompts
+        generateAiBtn.style.display = 'inline-block'; // Show Generate button
+        optimizeAiBtn.style.display = 'none'; // Hide Optimize button
+        hideAiSuggestionArea(); // Ensure AI area is hidden on view switch
         showView('detail');
     }
 
@@ -272,6 +287,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         promptTagsInput.addEventListener('focus', handleTagInput); // Show suggestions on focus too
 
+        // AI Buttons in Detail View
+        generateAiBtn.addEventListener('click', handleGenerateForNewPrompt);
+        optimizeAiBtn.addEventListener('click', handleOptimizeExistingPrompt);
+        useAiSuggestionBtn.addEventListener('click', handleUseAiSuggestion);
+        discardAiSuggestionBtn.addEventListener('click', handleDiscardAiSuggestion);
+
         // Settings listeners
         saveApiKeyBtn.addEventListener('click', handleSaveApiKey);
 
@@ -306,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const id = promptIdInput.value;
         const title = promptTitleInput.value.trim();
-        const content = promptContentInput.value.trim();
+        const content = promptContentInput.value.trim(); // Content might have been updated by AI
         const tagsString = promptTagsInput.value.trim().replace(/,$/, ''); // Remove trailing comma if any
 
         if (!title || !content) {
@@ -330,14 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 await addPrompt(promptData);
             }
             // Add any new tags entered by the user to the user tag list
-            // This loop ensures any tag in the final list gets added if it's new
             let tagsChanged = false;
             for (const tag of tags) {
-                 // Check if tag exists (case-insensitive) before adding
                  const lowerCaseTag = tag.toLowerCase();
                  if (!userDefinedTags.some(udTag => udTag.toLowerCase() === lowerCaseTag) &&
                      !predefinedTags.some(pdTag => pdTag.toLowerCase() === lowerCaseTag)) {
-                    await addUserTag(tag); // addUserTag handles uniqueness internally but this check avoids unnecessary calls
+                    await addUserTag(tag);
                     tagsChanged = true;
                  }
             }
@@ -500,6 +519,113 @@ document.addEventListener('DOMContentLoaded', () => {
         // generateNotesInput.value = '';
     }
 
+    // --- AI Generation/Optimization Handlers (Detail View) ---
+
+    function showAiSuggestionArea(message, isLoading = false) {
+        aiSuggestionArea.classList.remove('hidden');
+        aiStatusMessage.textContent = message;
+        aiStatusMessage.style.color = isLoading ? 'var(--text-color-secondary)' : 'var(--link-color)'; // Default to success color if not loading
+        if (isLoading) {
+            aiResultContainer.classList.add('hidden'); // Hide result area while loading
+        }
+    }
+
+    function displayAiSuggestionResult(content) {
+        aiStatusMessage.textContent = 'Suggestion ready:';
+        aiStatusMessage.style.color = 'var(--link-color)';
+        aiSuggestedContent.value = content;
+        aiResultContainer.classList.remove('hidden');
+    }
+
+    function displayAiSuggestionError(errorMessage) {
+         aiStatusMessage.textContent = `Error: ${errorMessage}`;
+         aiStatusMessage.style.color = 'var(--danger-color)';
+         aiResultContainer.classList.add('hidden'); // Hide result area on error
+    }
+
+    function hideAiSuggestionArea() {
+        aiSuggestionArea.classList.add('hidden');
+        aiStatusMessage.textContent = '';
+        aiSuggestedContent.value = '';
+        aiResultContainer.classList.add('hidden');
+    }
+
+    async function handleGenerateForNewPrompt() {
+        if (!currentApiKey) {
+            alert("OpenAI API Key not set. Please add it in Settings.");
+            return;
+        }
+        const tagsString = promptTagsInput.value.trim();
+        if (!tagsString) {
+            alert("Please enter some tags to generate a prompt.");
+            return;
+        }
+        const tags = tagsString.split(',').map(t => t.trim()).filter(t => t);
+
+        showAiSuggestionArea("Generating prompt based on tags...", true);
+        generateAiBtn.disabled = true; // Disable button while processing
+
+        try {
+            // Note: We are not using 'notes' here, only tags from the main form
+            const generatedContent = await generatePrompt(currentApiKey, tags);
+            displayAiSuggestionResult(generatedContent);
+             // Add any new tags used for generation to the user tag list
+             let tagsChanged = false;
+            for (const tag of tags) {
+                 const lowerCaseTag = tag.toLowerCase();
+                 if (!userDefinedTags.some(udTag => udTag.toLowerCase() === lowerCaseTag) &&
+                     !predefinedTags.some(pdTag => pdTag.toLowerCase() === lowerCaseTag)) {
+                    await addUserTag(tag);
+                    tagsChanged = true;
+                 }
+            }
+            if (tagsChanged) {
+                await loadUserTags(); // Reload tags if new ones were added
+            }
+        } catch (error) {
+            console.error("Generation failed:", error);
+            displayAiSuggestionError(error.message);
+        } finally {
+             generateAiBtn.disabled = false; // Re-enable button
+        }
+    }
+
+    async function handleOptimizeExistingPrompt() {
+         if (!currentApiKey) {
+            alert("OpenAI API Key not set. Please add it in Settings.");
+            return;
+        }
+        const currentContent = promptContentInput.value.trim();
+        if (!currentContent) {
+            alert("There is no content to optimize.");
+            return;
+        }
+
+        showAiSuggestionArea("Optimizing existing prompt...", true);
+        optimizeAiBtn.disabled = true; // Disable button while processing
+
+        try {
+            const optimizedContent = await optimizePrompt(currentApiKey, currentContent);
+            displayAiSuggestionResult(optimizedContent);
+        } catch (error) {
+             console.error("Optimization failed:", error);
+             displayAiSuggestionError(error.message);
+        } finally {
+            optimizeAiBtn.disabled = false; // Re-enable button
+        }
+    }
+
+    function handleUseAiSuggestion() {
+        const suggestedContent = aiSuggestedContent.value;
+        if (suggestedContent) {
+            promptContentInput.value = suggestedContent; // Update the main content area
+        }
+        hideAiSuggestionArea(); // Hide the suggestion area
+    }
+
+    function handleDiscardAiSuggestion() {
+        hideAiSuggestionArea(); // Just hide the suggestion area
+    }
 
     // --- UI Updates ---
     function updateApiKeyStatus(isSuccess = null) {
@@ -530,7 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
              generationStatus.textContent = '';
         }
     }
-
 
     // --- Start the application ---
     initialize();
