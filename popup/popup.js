@@ -556,18 +556,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const tagsString = promptTagsInput.value.trim();
+        // Get content from the main textarea to use as notes
+        const notesFromContent = promptContentInput.value.trim();
+
         if (!tagsString) {
             alert("Please enter some tags to generate a prompt.");
             return;
         }
         const tags = tagsString.split(',').map(t => t.trim()).filter(t => t);
 
-        showAiSuggestionArea("Generating prompt based on tags...", true);
+        showAiSuggestionArea("Generating prompt based on tags and content...", true);
         generateAiBtn.disabled = true; // Disable button while processing
 
         try {
-            // Note: We are not using 'notes' here, only tags from the main form
-            const generatedContent = await generatePrompt(currentApiKey, tags);
+            // Pass notesFromContent as the 'notes' parameter
+            const generatedContent = await generatePrompt(currentApiKey, tags, notesFromContent);
             displayAiSuggestionResult(generatedContent);
              // Add any new tags used for generation to the user tag list
              let tagsChanged = false;
