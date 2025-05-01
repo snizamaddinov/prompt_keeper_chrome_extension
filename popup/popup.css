@@ -279,3 +279,36 @@ body {
   ::-webkit-scrollbar-thumb:hover {
     background: #2d3135;
   }
+
+  .tag-suggestions-container {
+    position: relative; /* Or absolute depending on layout needs */
+    background-color: var(--background-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-top: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10; /* Ensure it appears above other elements */
+}
+
+.tag-suggestion-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tag-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.tag-suggestion-item:hover,
+.tag-suggestion-item.active { /* For keyboard navigation if added later */
+    background-color: var(--hover-background-color);
+    color: var(--link-color);
+}
+
+/* Hide container when empty */
+.tag-suggestions-container:empty {
+    display: none;
+}

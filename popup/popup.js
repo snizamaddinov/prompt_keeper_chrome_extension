@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const promptTitleInput = document.getElementById('prompt-title');
     const promptContentInput = document.getElementById('prompt-content');
     const promptTagsInput = document.getElementById('prompt-tags');
+    const tagSuggestionsContainer = document.getElementById('tag-suggestions'); // Added
     const savePromptBtn = document.getElementById('save-prompt-btn');
     const deletePromptBtn = document.getElementById('delete-prompt-btn');
     const copyPromptBtn = document.getElementById('copy-prompt-btn');
@@ -48,13 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'SQL', 'NoSQL', 'Cloud', 'AWS', 'GCP', 'Azure', 'Docker', 'Kubernetes'
     ]; // Add more as needed
     let userDefinedTags = [];
+    let combinedTags = []; // Added: For suggestions
     let currentApiKey = null;
 
     // --- Initialization ---
     async function initialize() {
         await loadApiKey(); // Load API key first
-        await loadPrompts();
-        await loadUserTags();
+        await loadUserTags(); // Load user tags before prompts might need them
+        await loadPrompts(); // Load prompts after tags are ready
+        updateCombinedTags(); // Initial combination
         setupEventListeners();
         renderPromptList();
         updateApiKeyStatus();
@@ -68,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadUserTags() {
         userDefinedTags = await getUserTags();
-        // Potentially update tag suggestions UI if implemented
+        updateCombinedTags(); // Update combined list when user tags change
     }
 
     async function loadApiKey() {
@@ -127,6 +130,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.addEventListener('click', () => showPromptDetail(prompt.id));
                 promptListUl.appendChild(li);
             });
+    }
+
+    // --- Tag Suggestions --- (New Section)
+
+    function updateCombinedTags() {
+        // Combine predefined and user tags, ensuring uniqueness (case-insensitive)
+        const allTags = [...predefinedTags, ...userDefinedTags];
+        combinedTags = [...new Map(allTags.map(tag => [tag.toLowerCase(), tag])).values()].sort();
+    }
+
+    function renderTagSuggestions(searchTerm, existingTags) {
+        tagSuggestionsContainer.innerHTML = ''; // Clear previous suggestions
+        if (!searchTerm) return; // Don't show suggestions if search term is empty
+
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const lowerCaseExistingTags = existingTags.map(t => t.toLowerCase());
+
+        const filteredTags = combinedTags.filter(tag => {
+            const lowerCaseTag = tag.toLowerCase();
+            // Check if tag includes the search term and is not already in the input
+            return lowerCaseTag.includes(lowerCaseSearchTerm) && !lowerCaseExistingTags.includes(lowerCaseTag);
+        });
+
+        filteredTags.slice(0, 10).forEach(tag => { // Limit suggestions shown
+            const div = document.createElement('div');
+            div.classList.add('tag-suggestion-item');
+            div.textContent = tag;
+            div.addEventListener('mousedown', (e) => { // Use mousedown to avoid blur event firing first
+                e.preventDefault(); // Prevent input from losing focus
+                selectTagSuggestion(tag);
+            });
+            tagSuggestionsContainer.appendChild(div);
+        });
+    }
+
+    function selectTagSuggestion(tag) {
+        const currentTagsValue = promptTagsInput.value.trim();
+        const tagsArray = currentTagsValue.split(',')
+            .map(t => t.trim())
+            .filter(t => t !== ''); // Get current tags
+
+        // Remove the part the user was typing
+        const lastCommaIndex = currentTagsValue.lastIndexOf(',');
+        let baseTags = '';
+        if (lastCommaIndex !== -1) {
+            baseTags = currentTagsValue.substring(0, lastCommaIndex + 1).trim() + ' '; // Keep space after comma
+        }
+
+        // Append the selected tag
+        promptTagsInput.value = baseTags + tag + ', ';
+
+        // Clear suggestions and refocus
+        tagSuggestionsContainer.innerHTML = '';
+        promptTagsInput.focus();
     }
 
     // --- View Switching ---
@@ -205,6 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
         deletePromptBtn.addEventListener('click', handleDeletePrompt);
         copyPromptBtn.addEventListener('click', handleCopyPrompt);
 
+        // Tag input listener for suggestions
+        promptTagsInput.addEventListener('input', handleTagInput);
+        promptTagsInput.addEventListener('blur', () => {
+            // Delay hiding suggestions slightly to allow click events on suggestions
+            setTimeout(() => {
+                tagSuggestionsContainer.innerHTML = '';
+            }, 150);
+        });
+        promptTagsInput.addEventListener('focus', handleTagInput); // Show suggestions on focus too
+
         // Settings listeners
         saveApiKeyBtn.addEventListener('click', handleSaveApiKey);
 
@@ -214,12 +281,33 @@ document.addEventListener('DOMContentLoaded', () => {
         discardGeneratedBtn.addEventListener('click', handleDiscardGeneratedPrompt);
     }
 
+    function handleTagInput() {
+        const value = promptTagsInput.value;
+        const cursorPos = promptTagsInput.selectionStart; // Get cursor position
+
+        // Find the text segment the cursor is in (between commas or start/end)
+        let startIndex = value.lastIndexOf(',', cursorPos - 1) + 1;
+        let endIndex = value.indexOf(',', cursorPos);
+        if (endIndex === -1) {
+            endIndex = value.length;
+        }
+
+        const currentTagFragment = value.substring(startIndex, endIndex).trim();
+
+        // Get tags already fully entered
+        const existingTags = value.substring(0, startIndex).split(',')
+                                .map(t => t.trim())
+                                .filter(t => t !== '');
+
+        renderTagSuggestions(currentTagFragment, existingTags);
+    }
+
     async function handleSavePrompt(event) {
         event.preventDefault();
         const id = promptIdInput.value;
         const title = promptTitleInput.value.trim();
         const content = promptContentInput.value.trim();
-        const tagsString = promptTagsInput.value.trim();
+        const tagsString = promptTagsInput.value.trim().replace(/,$/, ''); // Remove trailing comma if any
 
         if (!title || !content) {
             alert("Title and Content cannot be empty.");
@@ -242,11 +330,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 await addPrompt(promptData);
             }
             // Add any new tags entered by the user to the user tag list
+            // This loop ensures any tag in the final list gets added if it's new
+            let tagsChanged = false;
             for (const tag of tags) {
-                await addUserTag(tag); // This function handles uniqueness check
+                 // Check if tag exists (case-insensitive) before adding
+                 const lowerCaseTag = tag.toLowerCase();
+                 if (!userDefinedTags.some(udTag => udTag.toLowerCase() === lowerCaseTag) &&
+                     !predefinedTags.some(pdTag => pdTag.toLowerCase() === lowerCaseTag)) {
+                    await addUserTag(tag); // addUserTag handles uniqueness internally but this check avoids unnecessary calls
+                    tagsChanged = true;
+                 }
             }
+
             await loadPrompts(); // Reload prompts from storage
-            await loadUserTags(); // Reload user tags
+            if (tagsChanged) {
+                await loadUserTags(); // Reload user tags ONLY if they might have changed
+            }
             showView('list'); // Go back to the list view
         } catch (error) {
             console.error("Error saving prompt:", error);
@@ -350,10 +449,18 @@ document.addEventListener('DOMContentLoaded', () => {
             generationStatus.style.color = 'var(--link-color)'; // Use a success-like color
 
              // Add any new tags used for generation to the user tag list
+             let tagsChanged = false;
             for (const tag of tags) {
-                await addUserTag(tag);
+                 const lowerCaseTag = tag.toLowerCase();
+                 if (!userDefinedTags.some(udTag => udTag.toLowerCase() === lowerCaseTag) &&
+                     !predefinedTags.some(pdTag => pdTag.toLowerCase() === lowerCaseTag)) {
+                    await addUserTag(tag);
+                    tagsChanged = true;
+                 }
             }
-            await loadUserTags(); // Reload tags in case new ones were added
+            if (tagsChanged) {
+                await loadUserTags(); // Reload tags if new ones were added during generation
+            }
 
         } catch (error) {
             console.error("Generation failed:", error);
