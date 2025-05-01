@@ -415,11 +415,11 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.clipboard.writeText(content)
                 .then(() => {
                     // Optional: Show temporary success message
-                    const originalText = copyPromptBtn.textContent;
+                    const originalText = "Copy Content"; // Store original text
                     copyPromptBtn.textContent = 'Copied!';
                     copyPromptBtn.disabled = true; // Briefly disable
                     setTimeout(() => {
-                        copyPromptBtn.textContent = originalText;
+                        copyPromptBtn.textContent = originalText; // Reset to original text
                         copyPromptBtn.disabled = false;
                     }, 1500);
                 })

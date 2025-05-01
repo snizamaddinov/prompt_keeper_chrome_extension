@@ -35,10 +35,15 @@
             </div>
 
             <div id="prompt-detail-view" class="hidden">
-                <!-- New wrapper for back button and title -->
+                <!-- Updated wrapper for back button, title, and copy button -->
                 <div class="detail-header">
-                    <button id="back-to-list-btn">&larr; Back</button>
-                    <h2 id="detail-title">Prompt Details</h2>
+                    <!-- Group back button and title -->
+                    <div class="detail-header-left">
+                        <button id="back-to-list-btn">&larr; Back</button>
+                        <h2 id="detail-title">Prompt Details</h2>
+                    </div>
+                    <!-- Copy button separate on the right -->
+                    <button type="button" id="copy-prompt-btn" class="copy-button-highlight" title="Copy Content">Copy Content</button> <!-- Moved button, added class, changed text -->
                 </div>
                 <form id="prompt-form">
                     <input type="hidden" id="prompt-id">
@@ -75,7 +80,6 @@
                         <button type="button" id="generate-ai-btn" class="secondary">Generate with AI</button> <!-- For New Prompts -->
                         <button type="button" id="optimize-ai-btn" class="secondary">Optimize with AI</button> <!-- For Existing Prompts -->
                         <button type="button" id="delete-prompt-btn" class="danger">Delete</button>
-                        <button type="button" id="copy-prompt-btn" class="copy-button-highlight">Copy Content</button> <!-- Added class -->
                     </div>
                 </form>
             </div>

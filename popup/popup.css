@@ -210,11 +210,13 @@ body {
   
   .form-actions {
     display: flex;
-    gap: 5px;
+    gap: 15px;
     margin-top: 18px;
-    margin-bottom: 10px; /* Add space below the action buttons */
-    flex-wrap: wrap; /* Allow buttons to wrap on smaller widths */
-  }
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    justify-content: space-evenly; /* even space between and around buttons */
+}
+
   
   button.danger {
     background: #2d191a;
@@ -399,7 +401,7 @@ button.secondary:hover {
     background: none;
     border: none;
     color: #8ab4f8;
-    font-size: 1.1em; /* Adjust size as needed */
+    font-size: 1.5em; /* Adjust size as needed */
     padding: 4px 6px; /* Small padding */
     cursor: pointer;
     border-radius: 4px;
@@ -412,12 +414,20 @@ button.secondary:hover {
     color: #b3d3ff;
 }
 
-/* New style for the detail view header */
+/* Updated style for the detail view header */
 .detail-header {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Pushes left group left, copy button right */
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+/* New style for grouping back button and title */
+.detail-header-left {
+    display: flex;
+    align-items: center;
     gap: 15px; /* Space between back button and title */
-    margin-bottom: 10px; /* Reduce space below header slightly */
 }
 
 /* Adjust back button margin since it's now in flex container */
@@ -444,14 +454,35 @@ button.secondary:hover {
     font-weight: 600;
     color: #f3f3f3;
 }
+#copy-prompt-btn {
+  background: #8ab4f8;
+  color: #181a1b;  /* Dark text for contrast on light blue */
+  border: 1px solid #8ab4f8;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: background 0.15s, border 0.15s, box-shadow 0.15s;
+  font-weight: 600;
+  line-height: normal;
+  box-shadow: 0 0 8px rgba(138, 180, 248, 0.4); /* subtle blue glow */
+  margin-right: 15px;
+}
 
-/* Style for highlighted copy button in detail view */
+#copy-prompt-btn:hover {
+  background: #a3c2fa;  /* lighter blue on hover */
+  border-color: #a3c2fa;
+  box-shadow: 0 0 10px rgba(138, 180, 248, 0.6);
+}
+
 .copy-button-highlight {
-    background-color: #232b2f; /* Slightly darker background */
-    /* border: solid #8ab4f8; Highlight border */
-    color: #b3d3ff; /* Brighter text */
+  background-color: #8ab4f8;
+  border: 1px solid #b3d3ff;
+  color: #181a1b;
+  box-shadow: 0 0 8px rgba(179, 211, 255, 0.4);
 }
 .copy-button-highlight:hover {
-    background-color: #2d3135;
-    border-color: #b3d3ff;
+  background-color: #a3c2fa;
+  border-color: #d0e2ff;
+  box-shadow: 0 0 12px rgba(179, 211, 255, 0.6);
 }
