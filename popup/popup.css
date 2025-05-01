@@ -142,6 +142,7 @@ body {
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
+    margin-top: 4px; /* Add space between title and tags */
   }
   
   .prompt-item-tag {
@@ -161,7 +162,10 @@ body {
   #prompt-detail-view,
   #generate-prompt-view,
   #settings-view {
-    padding-top: 10px;
+    padding-top: 5px; /* Reduce top padding */
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 10px; /* Add some bottom padding */
   }
   
   .form-group {
@@ -208,6 +212,8 @@ body {
     display: flex;
     gap: 10px;
     margin-top: 18px;
+    margin-bottom: 10px; /* Add space below the action buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller widths */
   }
   
   button.danger {
@@ -411,7 +417,7 @@ button.secondary:hover {
     display: flex;
     align-items: center;
     gap: 15px; /* Space between back button and title */
-    margin-bottom: 15px; /* Space below header */
+    margin-bottom: 10px; /* Reduce space below header slightly */
 }
 
 /* Adjust back button margin since it's now in flex container */
