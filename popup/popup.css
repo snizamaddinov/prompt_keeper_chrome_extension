@@ -7,7 +7,7 @@ body {
     margin: 0;
     padding: 0;
     min-width: 380px;
-    max-width: 480px;
+    max-width: 500px;
     min-height: 420px;
   }
   
@@ -210,7 +210,7 @@ body {
   
   .form-actions {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     margin-top: 18px;
     margin-bottom: 10px; /* Add space below the action buttons */
     flex-wrap: wrap; /* Allow buttons to wrap on smaller widths */
@@ -448,7 +448,7 @@ button.secondary:hover {
 /* Style for highlighted copy button in detail view */
 .copy-button-highlight {
     background-color: #232b2f; /* Slightly darker background */
-    border: 1px solid #8ab4f8; /* Highlight border */
+    /* border: solid #8ab4f8; Highlight border */
     color: #b3d3ff; /* Brighter text */
 }
 .copy-button-highlight:hover {
