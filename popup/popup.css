@@ -105,14 +105,21 @@ body {
   
   .prompt-item {
     display: flex;
-    align-items: center;
+    align-items: center; /* Align items vertically */
     justify-content: space-between;
-    padding: 11px 0;
+    padding: 11px 0; /* Adjust padding if needed */
     border-bottom: 1px solid #232527;
     cursor: pointer;
     transition: background 0.13s;
   }
-  
+
+  /* New wrapper for title and tags to allow button next to them */
+  .prompt-item-content {
+      flex-grow: 1; /* Takes available space */
+      margin-right: 8px; /* Space before the copy button */
+      overflow: hidden; /* Prevent content overflow */
+  }
+
   .prompt-item:last-child {
     border-bottom: none;
   }
@@ -379,4 +386,66 @@ button.secondary:hover {
 #generate-ai-btn,
 #optimize-ai-btn {
     display: none;
+}
+
+/* Style for the new copy button in the list */
+.copy-list-item-btn {
+    background: none;
+    border: none;
+    color: #8ab4f8;
+    font-size: 1.1em; /* Adjust size as needed */
+    padding: 4px 6px; /* Small padding */
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0; /* Prevent button from shrinking */
+    margin-left: auto; /* Push to the right */
+}
+
+.copy-list-item-btn:hover {
+    background-color: #232b2f;
+    color: #b3d3ff;
+}
+
+/* New style for the detail view header */
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between back button and title */
+    margin-bottom: 15px; /* Space below header */
+}
+
+/* Adjust back button margin since it's now in flex container */
+#back-to-list-btn {
+    margin-bottom: 0;
+    padding: 0; /* Remove default padding if needed */
+    /* Keep other back button styles */
+    background: none;
+    border: none;
+    color: #8ab4f8;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 500;
+}
+#back-to-list-btn:hover {
+    text-decoration: underline;
+    color: #b3d3ff;
+}
+
+/* Adjust title margin */
+#detail-title {
+    margin: 0; /* Remove default margins */
+    font-size: 1.15em; /* Match header h1 */
+    font-weight: 600;
+    color: #f3f3f3;
+}
+
+/* Style for highlighted copy button in detail view */
+.copy-button-highlight {
+    background-color: #232b2f; /* Slightly darker background */
+    border: 1px solid #8ab4f8; /* Highlight border */
+    color: #b3d3ff; /* Brighter text */
+}
+.copy-button-highlight:hover {
+    background-color: #2d3135;
+    border-color: #b3d3ff;
 }

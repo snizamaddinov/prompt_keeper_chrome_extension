@@ -113,10 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.classList.add('prompt-item');
                 li.dataset.id = prompt.id; // Store ID for easy access
 
+                // Wrapper for title and tags
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('prompt-item-content');
+
                 const titleSpan = document.createElement('span');
                 titleSpan.classList.add('prompt-item-title');
                 titleSpan.textContent = prompt.title;
-                li.appendChild(titleSpan);
+                contentDiv.appendChild(titleSpan);
 
                 if (prompt.tags && prompt.tags.length > 0) {
                     const tagsDiv = document.createElement('div');
@@ -133,10 +137,29 @@ document.addEventListener('DOMContentLoaded', () => {
                          moreTagsSpan.textContent = `+${prompt.tags.length - 3}`;
                          tagsDiv.appendChild(moreTagsSpan);
                      }
-                    li.appendChild(tagsDiv);
+                    contentDiv.appendChild(tagsDiv);
                 }
 
-                li.addEventListener('click', () => showPromptDetail(prompt.id));
+                li.appendChild(contentDiv); // Add content wrapper to li
+
+                // Create and add the copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.classList.add('copy-list-item-btn');
+                copyBtn.title = 'Copy Content';
+                copyBtn.innerHTML = '📄'; // Use an icon or text
+                copyBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent li click handler
+                    handleCopyFromList(prompt.id, copyBtn);
+                });
+                li.appendChild(copyBtn); // Add copy button to li
+
+                // Add click listener to the whole item (excluding button)
+                // We attach it to the contentDiv to avoid conflict with the button
+                contentDiv.addEventListener('click', () => showPromptDetail(prompt.id));
+                // Or attach to li and rely on stopPropagation in button handler
+                // li.addEventListener('click', () => showPromptDetail(prompt.id));
+
+
                 promptListUl.appendChild(li);
             });
     }
@@ -394,14 +417,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Optional: Show temporary success message
                     const originalText = copyPromptBtn.textContent;
                     copyPromptBtn.textContent = 'Copied!';
+                    copyPromptBtn.disabled = true; // Briefly disable
                     setTimeout(() => {
                         copyPromptBtn.textContent = originalText;
+                        copyPromptBtn.disabled = false;
                     }, 1500);
                 })
                 .catch(err => {
                     console.error('Failed to copy text: ', err);
                     alert('Failed to copy prompt content.');
                 });
+        }
+    }
+
+    // New handler for copying from the LIST view
+    async function handleCopyFromList(promptId, buttonElement) {
+        const prompt = allPrompts.find(p => p.id === promptId);
+        if (prompt && prompt.content) {
+             try {
+                await navigator.clipboard.writeText(prompt.content);
+                // Visual feedback
+                const originalHtml = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✅'; // Copied icon/text
+                buttonElement.disabled = true;
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalHtml;
+                    buttonElement.disabled = false;
+                }, 1500);
+            } catch (err) {
+                console.error('Failed to copy text from list: ', err);
+                // Optional: brief error indication on button
+                const originalHtml = buttonElement.innerHTML;
+                buttonElement.innerHTML = '❌';
+                 buttonElement.disabled = true;
+                 setTimeout(() => {
+                    buttonElement.innerHTML = originalHtml;
+                    buttonElement.disabled = false;
+                }, 1500);
+            }
+        } else {
+            console.error('Could not find prompt content for ID:', promptId);
         }
     }
 

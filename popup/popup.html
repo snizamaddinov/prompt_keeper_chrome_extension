@@ -22,13 +22,24 @@
             <div id="prompt-list-view">
                 <ul id="prompt-list">
                     <!-- Prompt items will be loaded here -->
-                    <li class="prompt-item">Loading...</li>
+                    <!-- Example structure of a loaded item:
+                    <li class="prompt-item" data-id="some-id">
+                        <div class="prompt-item-content"> <!-- New wrapper for title/tags -->
+                            <span class="prompt-item-title">Prompt Title</span>
+                            <div class="prompt-item-tags">
+                                <span class="prompt-item-tag">tag1</span>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
 
             <div id="prompt-detail-view" class="hidden">
-                <button id="back-to-list-btn">&larr; Back</button>
-                <h2 id="detail-title">Prompt Details</h2>
+                <!-- New wrapper for back button and title -->
+                <div class="detail-header">
+                    <button id="back-to-list-btn">&larr; Back</button>
+                    <h2 id="detail-title">Prompt Details</h2>
+                </div>
                 <form id="prompt-form">
                     <input type="hidden" id="prompt-id">
                     <div class="form-group">
@@ -64,7 +75,7 @@
                         <button type="button" id="generate-ai-btn" class="secondary">Generate with AI</button> <!-- For New Prompts -->
                         <button type="button" id="optimize-ai-btn" class="secondary">Optimize with AI</button> <!-- For Existing Prompts -->
                         <button type="button" id="delete-prompt-btn" class="danger">Delete</button>
-                        <button type="button" id="copy-prompt-btn">Copy Content</button>
+                        <button type="button" id="copy-prompt-btn" class="copy-button-highlight">Copy Content</button> <!-- Added class -->
                     </div>
                 </form>
             </div>
